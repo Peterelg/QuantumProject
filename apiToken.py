@@ -1,0 +1,4 @@
+from quantuminspire.credentials import save_account
+save_account('3f5cb57ce423b302807f70bb140a5cd4d0fa8924')
+from quantuminspire.credentials import enable_account
+enable_account('3f5cb57ce423b302807f70bb140a5cd4d0fa8924')

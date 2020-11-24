@@ -1,0 +1,3 @@
+[braket.simulators]
+default = braket.default_simulator:DefaultSimulator
+
