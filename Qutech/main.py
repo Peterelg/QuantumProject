@@ -1,11 +1,7 @@
 from coreapi.auth import BasicAuthentication
 from quantuminspire.api import QuantumInspireAPI
 
-email = 'peter@laptify.nl'
-password = 'pehello@@'
 
-server_url = r'https://api.quantum-inspire.com'
-authentication = BasicAuthentication(email, password)
 qi = QuantumInspireAPI()
 
 
