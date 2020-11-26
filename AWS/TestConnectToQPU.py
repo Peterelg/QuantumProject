@@ -19,8 +19,8 @@ s3_folder = (my_bucket, my_prefix)
 
 # print all (the usual suspects) available gates currently available within SDK
 gate_set = [attr for attr in dir(Gate) if attr[0] in string.ascii_uppercase]
-print('Gate set supported by SDK:\n', gate_set)
-print('\n')
+# print('Gate set supported by SDK:\n', gate_set)
+# print('\n')
 
 # the Rigetti device
 device = AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
