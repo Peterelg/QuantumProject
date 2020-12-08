@@ -62,20 +62,23 @@ def factor(P):
     validate_input(P, range(2 ** 6))
 
     # Constraint satisfaction problem
-    csp = dbc.factories.multiplication_circuit(3)
+    # where the number of
+    csp = dbc.factories.multiplication_circuit(4)
 
     # Binary quadratic model
     bqm = dbc.stitch(csp, min_classical_gap=.1)
 
     # multiplication_circuit() creates these variables
-    p_vars = ['p0', 'p1', 'p2', 'p3', 'p4', 'p5']
+    p_vars = ['p0', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7']
 
     # Convert P from decimal to binary
-    fixed_variables = dict(zip(reversed(p_vars), "{:06b}".format(P)))
+    fixed_variables = dict(zip(reversed(p_vars), "{:08b}".format(P)))
     fixed_variables = {var: int(x) for(var, x) in fixed_variables.items()}
-
+    print("fixed variables")
+    print(fixed_variables)
     # Fix product qubits
     for var, value in fixed_variables.items():
+        print(var, value)
         bqm.fix_variable(var, value)
 
     log.debug('bqm construction time: %s', time.time() - construction_start_time)
@@ -88,7 +91,7 @@ def factor(P):
     # Set a QPU sampler
     sampler = EmbeddingComposite(DWaveSampler())
 
-    num_reads = 100
+    num_reads = 1000
     sampleset = sampler.sample(bqm, num_reads=num_reads)
 
     log.debug('embedding and sampling time: %s', time.time() - sample_time)
@@ -114,8 +117,8 @@ def factor(P):
     }
 
     # multiplication_circuit() creates these variables
-    a_vars = ['a0', 'a1', 'a2']
-    b_vars = ['b0', 'b1', 'b2']
+    a_vars = ['a0', 'a1', 'a2', 'a3']
+    b_vars = ['b0', 'b1', 'b2', 'b3']
 
     results_dict = OrderedDict()
     for sample, num_occurrences in sampleset.data(['sample', 'num_occurrences']):
@@ -133,11 +136,12 @@ def factor(P):
             results_dict[(a, b, P)]["Percentage of results"] = 100 * \
                 results_dict[(a, b, P)]["Occurrences"] / num_reads
         else:
-            results_dict[(a, b, P)] = {"a": a,
-                                       "b": b,
-                                       "Valid": a * b == P,
-                                       "Occurrences": num_occurrences,
-                                       "Percentage of results": 100 * num_occurrences / num_reads}
+            # if a * b == P:
+                results_dict[(a, b, P)] = {"a": a,
+                                           "b": b,
+                                           "Valid": a * b == P,
+                                           "Occurrences": num_occurrences,
+                                           "Percentage of results": 100 * num_occurrences / num_reads}
 
     output['Results'] = list(results_dict.values())
     output['Number of reads'] = num_reads
