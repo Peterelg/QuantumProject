@@ -4,12 +4,11 @@ import time
 import logging
 import functools
 from collections import OrderedDict
-
+from saveData import save_data
 import dwavebinarycsp as dbc
 from dwave.system import DWaveSampler, EmbeddingComposite
 
 log = logging.getLogger(__name__)
-size_of_circuit = 10
 
 def sanitised_input(description, variable, range_):
     start = range_[0]
@@ -43,7 +42,7 @@ def validate_input(ui, range_):
 def make_array(size,string):
     return [string+str(i) for i in range(size)]
 
-def factor(P):
+def factor(P, gap_size, max_graph_size, size_of_circuit):
 
     # Construct circuit
     # =================
@@ -56,7 +55,7 @@ def factor(P):
     csp = dbc.factories.multiplication_circuit(size_of_circuit)
 
     # Binary quadratic model
-    bqm = dbc.stitch(csp, min_classical_gap=.1)
+    bqm = dbc.stitch(csp, min_classical_gap=gap_size, max_graph_size=max_graph_size)
 
     # multiplication_circuit() creates these variables
     p_vars = make_array(size_of_circuit*2,'p')
@@ -80,6 +79,7 @@ def factor(P):
     sampler = EmbeddingComposite(DWaveSampler())
 
     num_reads = 1000
+    print("Sent to D-Wave")
     sampleset = sampler.sample(bqm, num_reads=num_reads)
 
     log.debug('embedding and sampling time: %s', time.time() - sample_time)
@@ -107,7 +107,7 @@ def factor(P):
     # multiplication_circuit() creates these variables
     a_vars = make_array(size_of_circuit, 'a')
     b_vars = make_array(size_of_circuit, 'b')
-
+    wrong_A = 0
     results_dict = OrderedDict()
     for sample, num_occurrences in sampleset.data(['sample', 'num_occurrences']):
         # Convert A and B from binary to decimal
@@ -124,28 +124,43 @@ def factor(P):
             results_dict[(a, b, P)]["Percentage of results"] = 100 * \
                 results_dict[(a, b, P)]["Occurrences"] / num_reads
         else:
-            if a * b == P:
+            # if a * b == P:
+            # results_dict[(a, b, P)] = {a, b, a * b == P, num_occurrences, 100 * num_occurrences / num_reads}
                 results_dict[(a, b, P)] = {"a": a,
                                            "b": b,
                                            "Valid": a * b == P,
                                            "Occurrences": num_occurrences,
                                            "Percentage of results": 100 * num_occurrences / num_reads}
+            # else:
+            #     wrong_A = wrong_A + 1
+                # results_dict[(a, b, P)] = {"a": a,
+                #                            "b": b,
+                #                            "Valid": a * b == P,
+                #                            "Occurrences": num_occurrences,
+                #                            "Percentage of results": 100 * num_occurrences / num_reads}
 
     output['Results'] = list(results_dict.values())
     output['Number of reads'] = num_reads
 
     output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
-
+    save_data(P,'Advantage_system1.1',size_of_circuit,gap_size,max_graph_size, output)
     return output
 
 if __name__ == '__main__':
     # get input from user
     print("Enter a number to be factored:")
-    P = sanitised_input("product", "P", range(2 ** (size_of_circuit*2)))
-
-    # send problem to QPU
+    #
+    # # send problem to QPU
     print("Running on QPU")
-    output = factor(P)
+    # numbers = [143,1000,403,901]
+    numbers = [299]
+    gaps = [0.01,0.03,0.05,0.08,0.1]
+    for n in numbers:
+        for gap in gaps:
+            for graph in range(5,20,5):
+                for circuit in range(5,8):
+                    output = factor(n, gap, graph, circuit)
+                    print('done:',gap,graph,circuit)
 
     # output results
-    pprint(output)
+    # pprint(output)

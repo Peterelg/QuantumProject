@@ -509,7 +509,8 @@ if __name__ == '__main__':
     print('Executing the circuit {0} times for N={1} and a={2}\n'.format(number_shots, N, a))
 
     """ Simulate the created Quantum Circuit """
-    simulation = execute(circuit, backend=BasicAer.get_backend('qasm_simulator'), shots=number_shots)
+    # simulation = execute(circuit, backend=BasicAer.get_backend('qasm_simulator'), shots=number_shots)
+    simulation = execute(circuit, backend=IBMQ.get_backend('ibmq_qasm_simulator'), shots=number_shots)
     """ to run on IBM, use backend=IBMQ.get_backend('ibmq_qasm_simulator') in execute() function """
     """ to run locally, use backend=BasicAer.get_backend('qasm_simulator') in execute() function """
 
