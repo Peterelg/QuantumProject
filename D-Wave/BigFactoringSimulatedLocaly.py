@@ -3,13 +3,15 @@ from pprint import pprint
 import time
 import logging
 import functools
+import helpers
 from collections import OrderedDict
-from saveData import save_data
 import dwavebinarycsp as dbc
 from dwave.system import DWaveSampler, EmbeddingComposite
-
+from EditedCircuit import multiplication_circuit
+import neal
 log = logging.getLogger(__name__)
 
+"""This file factors numbers locally so more experimentation can occur"""
 def sanitised_input(description, variable, range_):
     start = range_[0]
     stop = range_[-1]
@@ -52,13 +54,15 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
 
     # Constraint satisfaction problem
     # where the number of
-    csp = dbc.factories.multiplication_circuit(size_of_circuit)
-
+    csp, inputs = multiplication_circuit(size_of_circuit)
     # Binary quadratic model
-    bqm = dbc.stitch(csp, min_classical_gap=gap_size, max_graph_size=max_graph_size)
-
+    bqm = dbc.stitch(csp, max_graph_size=max_graph_size, min_classical_gap=gap_size)
+    # for c in iter(csp.constraints):
+    #     print(c)
     # multiplication_circuit() creates these variables
     p_vars = make_array(size_of_circuit*2,'p')
+    a_vars = make_array(size_of_circuit, 'a')
+    b_vars = make_array(size_of_circuit, 'b')
     binary = "{:0"+str(size_of_circuit*2)+"b}"
     # Convert P from decimal to binary
     fixed_variables = dict(zip(reversed(p_vars), binary.format(P)))
@@ -67,8 +71,11 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     # Fix product qubits
     for var, value in fixed_variables.items():
         bqm.fix_variable(var, value)
-
-
+        # print(var,value)
+    # bqm.fix_variable('a0', 1)
+    # bqm.fix_variable('b0', 1)
+    # bqm.fix_variable('a3', 1)
+    # bqm.fix_variable('b3', 1)
     log.debug('bqm construction time: %s', time.time() - construction_start_time)
 
     # Run problem
@@ -77,10 +84,10 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     sample_time = time.time()
 
     # Set a QPU sampler
-    sampler = EmbeddingComposite(DWaveSampler())
+    sampler = neal.SimulatedAnnealingSampler()
 
     num_reads = 1000
-    print("Sent to D-Wave")
+    print("running localy")
     sampleset = sampler.sample(bqm, num_reads=num_reads)
 
     log.debug('embedding and sampling time: %s', time.time() - sample_time)
@@ -106,8 +113,7 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     }
 
     # multiplication_circuit() creates these variables
-    a_vars = make_array(size_of_circuit, 'a')
-    b_vars = make_array(size_of_circuit, 'b')
+
     wrong_A = 0
     results_dict = OrderedDict()
     for sample, num_occurrences in sampleset.data(['sample', 'num_occurrences']):
@@ -125,7 +131,7 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
             results_dict[(a, b, P)]["Percentage of results"] = 100 * \
                 results_dict[(a, b, P)]["Occurrences"] / num_reads
         else:
-            # if a * b == P:
+            if a * b == P:
             # results_dict[(a, b, P)] = {a, b, a * b == P, num_occurrences, 100 * num_occurrences / num_reads}
                 results_dict[(a, b, P)] = {"a": a,
                                            "b": b,
@@ -143,25 +149,16 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     output['Results'] = list(results_dict.values())
     output['Number of reads'] = num_reads
 
-    output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
-    save_data(P,'Advantage_system1.1',size_of_circuit,gap_size,max_graph_size, output)
-    return output
+    # output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
+    return output, csp
 
 if __name__ == '__main__':
     # get input from user
-    print("Enter a number to be factored:")
-    #
-    # # send problem to QPU
-    print("Running on QPU")
-    # numbers = [143,1000,403,901]
-    numbers = [299]
-    gaps = [0.01,0.03,0.05,0.08,0.1]
-    for n in numbers:
-        for gap in gaps:
-            for graph in range(5,20,5):
-                for circuit in range(5,8):
-                    output = factor(n, gap, graph, circuit)
-                    print('done:',gap,graph,circuit)
+    number = 59989
+    gap = 0.1
+    graph = 8
+    circuit = 8
+    output, csp = factor(number, gap, graph, circuit)
 
     # output results
-    # pprint(output)
+    pprint(output)
