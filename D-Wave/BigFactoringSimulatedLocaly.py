@@ -9,9 +9,12 @@ import dwavebinarycsp as dbc
 from dwave.system import DWaveSampler, EmbeddingComposite
 from EditedCircuit import multiplication_circuit
 import neal
+
 log = logging.getLogger(__name__)
 
 """This file factors numbers locally so more experimentation can occur"""
+
+
 def sanitised_input(description, variable, range_):
     start = range_[0]
     stop = range_[-1]
@@ -31,6 +34,7 @@ def sanitised_input(description, variable, range_):
 
         return ui
 
+
 def validate_input(ui, range_):
     start = range_[0]
     stop = range_[-1]
@@ -41,16 +45,17 @@ def validate_input(ui, range_):
     if ui not in range_:
         raise ValueError("Input must be between {} and {}".format(start, stop))
 
-def make_array(size,string):
-    return [string+str(i) for i in range(size)]
+
+def make_array(size, string):
+    return [string + str(i) for i in range(size)]
+
 
 def factor(P, gap_size, max_graph_size, size_of_circuit):
-
     # Construct circuit
     # =================
     construction_start_time = time.time()
 
-    validate_input(P, range(2 ** (size_of_circuit*2)))
+    validate_input(P, range(2 ** (size_of_circuit * 2)))
 
     # Constraint satisfaction problem
     # where the number of
@@ -60,13 +65,13 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     # for c in iter(csp.constraints):
     #     print(c)
     # multiplication_circuit() creates these variables
-    p_vars = make_array(size_of_circuit*2,'p')
+    p_vars = make_array(size_of_circuit * 2, 'p')
     a_vars = make_array(size_of_circuit, 'a')
     b_vars = make_array(size_of_circuit, 'b')
-    binary = "{:0"+str(size_of_circuit*2)+"b}"
+    binary = "{:0" + str(size_of_circuit * 2) + "b}"
     # Convert P from decimal to binary
     fixed_variables = dict(zip(reversed(p_vars), binary.format(P)))
-    fixed_variables = {var: int(x) for(var, x) in fixed_variables.items()}
+    fixed_variables = {var: int(x) for (var, x) in fixed_variables.items()}
 
     # Fix product qubits
     for var, value in fixed_variables.items():
@@ -129,10 +134,10 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
         if (a, b, P) in results_dict:
             results_dict[(a, b, P)]["Occurrences"] += num_occurrences
             results_dict[(a, b, P)]["Percentage of results"] = 100 * \
-                results_dict[(a, b, P)]["Occurrences"] / num_reads
+                                                               results_dict[(a, b, P)]["Occurrences"] / num_reads
         else:
             if a * b == P:
-            # results_dict[(a, b, P)] = {a, b, a * b == P, num_occurrences, 100 * num_occurrences / num_reads}
+                # results_dict[(a, b, P)] = {a, b, a * b == P, num_occurrences, 100 * num_occurrences / num_reads}
                 results_dict[(a, b, P)] = {"a": a,
                                            "b": b,
                                            "Valid": a * b == P,
@@ -140,17 +145,18 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
                                            "Percentage of results": 100 * num_occurrences / num_reads}
             # else:
             #     wrong_A = wrong_A + 1
-                # results_dict[(a, b, P)] = {"a": a,
-                #                            "b": b,
-                #                            "Valid": a * b == P,
-                #                            "Occurrences": num_occurrences,
-                #                            "Percentage of results": 100 * num_occurrences / num_reads}
+            # results_dict[(a, b, P)] = {"a": a,
+            #                            "b": b,
+            #                            "Valid": a * b == P,
+            #                            "Occurrences": num_occurrences,
+            #                            "Percentage of results": 100 * num_occurrences / num_reads}
 
     output['Results'] = list(results_dict.values())
     output['Number of reads'] = num_reads
 
     # output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
     return output, csp
+
 
 if __name__ == '__main__':
     # get input from user

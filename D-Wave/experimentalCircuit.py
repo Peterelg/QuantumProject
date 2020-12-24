@@ -6,11 +6,12 @@ import neal
 from dwavebinarycsp.core.csp import ConstraintSatisfactionProblem
 from dwavebinarycsp.factories.constraint.gates import and_gate, halfadder_gate, fulladder_gate, or_gate
 
-
-
 """This circuit is meant for bear bone trying out a CSP circuit"""
-def make_array(size,string):
-    return [string+str(i) for i in range(size)]
+
+
+def make_array(size, string):
+    return [string + str(i) for i in range(size)]
+
 
 def get_data(sampleset, P):
     output = {
@@ -47,18 +48,19 @@ def get_data(sampleset, P):
         if (a, b, P) in results_dict:
             results_dict[(a, b, P)]["Occurrences"] += num_occurrences
             results_dict[(a, b, P)]["Percentage of results"] = 100 * \
-                results_dict[(a, b, P)]["Occurrences"] / num_reads
+                                                               results_dict[(a, b, P)]["Occurrences"] / num_reads
         else:
             results_dict[(a, b, P)] = {"a": a,
-                                           "b": b,
-                                           # "Valid": a * b == P,
-                                           "Occurrences": num_occurrences,
-                                           "Percentage of results": 100 * num_occurrences / num_reads}
+                                       "b": b,
+                                       # "Valid": a * b == P,
+                                       "Occurrences": num_occurrences,
+                                       "Percentage of results": 100 * num_occurrences / num_reads}
     output['Results'] = list(results_dict.values())
     output['Number of reads'] = num_reads
     return output
 
-#create circuit that creates constraints for 2**7 bit number
+
+# create circuit that creates constraints for 2**7 bit number
 def circuit(vartype=dimod.BINARY):
     num_multiplier_bits = num_multiplicand_bits = nbit = 4
 
@@ -79,12 +81,13 @@ def circuit(vartype=dimod.BINARY):
 
     return csp
 
+
 if __name__ == '__main__':
     csp = circuit()
 
     bqm = dbc.stitch(csp)
     bqm.fix_variable('p0', 0)
-    bqm.fix_variable('a0',1)
+    bqm.fix_variable('a0', 1)
     sampler = neal.SimulatedAnnealingSampler()
     num_reads = 1
     sampleset = sampler.sample(bqm, num_reads=num_reads)

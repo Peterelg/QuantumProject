@@ -24,6 +24,7 @@ from dwave.system import DWaveSampler, EmbeddingComposite
 
 log = logging.getLogger(__name__)
 
+
 def sanitised_input(description, variable, range_):
     start = range_[0]
     stop = range_[-1]
@@ -43,6 +44,7 @@ def sanitised_input(description, variable, range_):
 
         return ui
 
+
 def validate_input(ui, range_):
     start = range_[0]
     stop = range_[-1]
@@ -53,8 +55,8 @@ def validate_input(ui, range_):
     if ui not in range_:
         raise ValueError("Input must be between {} and {}".format(start, stop))
 
-def factor(P):
 
+def factor(P):
     # Construct circuit
     # =================
     construction_start_time = time.time()
@@ -70,10 +72,10 @@ def factor(P):
 
     # multiplication_circuit() creates these variables
     p_vars = ['p0', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7']
-    binary = "{:0"+str(8)+"b}"
+    binary = "{:0" + str(8) + "b}"
     # Convert P from decimal to binary
     fixed_variables = dict(zip(reversed(p_vars), binary.format(P)))
-    fixed_variables = {var: int(x) for(var, x) in fixed_variables.items()}
+    fixed_variables = {var: int(x) for (var, x) in fixed_variables.items()}
     print("fixed variables")
     print(fixed_variables)
     # Fix product qubits
@@ -134,14 +136,14 @@ def factor(P):
         if (a, b, P) in results_dict:
             results_dict[(a, b, P)]["Occurrences"] += num_occurrences
             results_dict[(a, b, P)]["Percentage of results"] = 100 * \
-                results_dict[(a, b, P)]["Occurrences"] / num_reads
+                                                               results_dict[(a, b, P)]["Occurrences"] / num_reads
         else:
             # if a * b == P:
-                results_dict[(a, b, P)] = {"a": a,
-                                           "b": b,
-                                           "Valid": a * b == P,
-                                           "Occurrences": num_occurrences,
-                                           "Percentage of results": 100 * num_occurrences / num_reads}
+            results_dict[(a, b, P)] = {"a": a,
+                                       "b": b,
+                                       "Valid": a * b == P,
+                                       "Occurrences": num_occurrences,
+                                       "Percentage of results": 100 * num_occurrences / num_reads}
 
     output['Results'] = list(results_dict.values())
     output['Number of reads'] = num_reads

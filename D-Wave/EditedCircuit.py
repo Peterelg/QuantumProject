@@ -19,15 +19,12 @@ from collections import defaultdict
 import operator
 import dimod
 
-
 """This circuit is the circuit that makes new constraints to the muliplication circuit"""
 
 from dwavebinarycsp.core.csp import ConstraintSatisfactionProblem
 from dwavebinarycsp.factories.constraint.gates import and_gate, halfadder_gate, fulladder_gate
 
 __all__ = ['multiplication_circuit']
-
-
 
 
 def multiplication_circuit(nbit, vartype=dimod.BINARY):
@@ -107,12 +104,12 @@ def multiplication_circuit(nbit, vartype=dimod.BINARY):
     CARRY = defaultdict(dict)  # the carry of the ADDER gate associated with ai, bj is stored in CARRY[i][j]
     allGates = []
 
-    #make sure that the first and last bits in a and b are 1
+    # make sure that the first and last bits in a and b are 1
     csp.add_constraint(operator.truth, ['a0'])
     csp.add_constraint(operator.truth, ['b0'])
-    csp.add_constraint(operator.truth, [a[nbit-1]])
-    csp.add_constraint(operator.truth, [b[nbit-1]])
-    csp.add_constraint({(1,1)}, [a[nbit-1],b[0]])
+    csp.add_constraint(operator.truth, [a[nbit - 1]])
+    csp.add_constraint(operator.truth, [b[nbit - 1]])
+    csp.add_constraint({(1, 1)}, [a[nbit - 1], b[0]])
     csp.add_constraint({(1, 1)}, [b[nbit - 1], a[0]])
 
     for i in range(num_multiplier_bits):
@@ -121,7 +118,6 @@ def multiplication_circuit(nbit, vartype=dimod.BINARY):
             # csp.add_constraint(and_gate(a[0],b[j],b[j]))
             # csp.add_constraint(and_gate(a[nbit-1], b[j], b[j]))
             # csp.add_constraint(and_gate(a[i], b[nbit-1], a[i]))
-
 
             ai = a[i]
             bj = b[j]
@@ -151,11 +147,11 @@ def multiplication_circuit(nbit, vartype=dimod.BINARY):
             # determine if there is a carry in
             if i - 1 in CARRY and j in CARRY[i - 1]:
                 inputs.append(CARRY[i - 1][j])
-                allGates.append('carry%s,%s' % (i-1, j))
+                allGates.append('carry%s,%s' % (i - 1, j))
             # determine if there is a sum in
             if i - 1 in SUM and j + 1 in SUM[i - 1]:
                 inputs.append(SUM[i - 1][j + 1])
-                allGates.append('sum%s,%s' % (i-1, j+1))
+                allGates.append('sum%s,%s' % (i - 1, j + 1))
 
             # ok, add create adders if necessary
             if len(inputs) == 1:
