@@ -36,8 +36,8 @@ def multiplication_circuit(nbit, vartype=dimod.BINARY, lenA=nbit, lenB=nbit):
     CARRY = defaultdict(dict)  # the carry of the ADDER gate associated with ai, bj is stored in CARRY[i][j]
 
     # we follow a shift adder
-    for i in range(num_multiplier_bits):
-        for j in range(num_multiplicand_bits):
+    for i in range(lenA):
+        for j in range(lenB):
 
             ai = a[i]
             bj = b[j]
