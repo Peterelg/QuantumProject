@@ -86,7 +86,9 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     bqm.fix_variable('b0', 1)
     bqm.fix_variable('a'+str(size_of_circuit-1), 1)
     bqm.fix_variable('b'+str(size_of_circuit-1), 1)
-
+    # print(csp.constraints)
+    # for constraint in csp.constraints:
+    #     print(constraint)
     log.debug('bqm construction time: %s', time.time() - construction_start_time)
 
     # Run problem
