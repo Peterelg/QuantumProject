@@ -9,7 +9,7 @@ from dwavebinarycsp.factories.constraint.gates import and_gate, halfadder_gate, 
 __all__ = ['multiplication_circuit']
 
 
-def multiplication_circuit_different_factors(nbit, vartype=dimod.BINARY, lenA=nbit, lenB=nbit):
+def multiplication_circuit_different_factors(nbit, lenA, lenB, vartype=dimod.BINARY):
 
 
     if nbit < 1:

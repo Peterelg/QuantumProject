@@ -68,7 +68,7 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     """different lengths of a and b"""
     len_a = size_of_circuit
     len_b = size_of_circuit
-    csp = multiplication_circuit_different_factors(size_of_circuit)
+    csp = multiplication_circuit_different_factors(size_of_circuit, len_a, len_b)
 
     # Binary quadratic model
     bqm = dbc.stitch(csp, max_graph_size=max_graph_size, min_classical_gap=gap_size)
