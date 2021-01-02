@@ -104,7 +104,9 @@ def multiplication_circuit_different_factors(nbit, lenA, lenB, vartype=dimod.BIN
                 csp.add_constraint(gate)
 
     # now we have a final row of full adders
+    """todo need to fix this"""
     for col in range(nbit - 1):
+        print(col)
         inputs = [CARRY[nbit - 1][col], SUM[nbit - 1][col + 1]]
 
         if col == 0:

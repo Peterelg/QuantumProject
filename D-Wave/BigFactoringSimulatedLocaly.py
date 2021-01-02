@@ -6,7 +6,7 @@ import functools
 import helpers
 from collections import OrderedDict
 import dwavebinarycsp as dbc
-from FactoingwithDifferentLengths import multiplication_circuit_different_factors
+from FactoringwithDifferentLengths import multiplication_circuit_different_factors
 from dwave.system import DWaveSampler, EmbeddingComposite
 from EditedCircuit import multiplication_circuit
 import neal
@@ -66,8 +66,8 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
 
 
     """different lengths of a and b"""
-    len_a = size_of_circuit
-    len_b = size_of_circuit
+    len_a = 4
+    len_b = 5
     csp = multiplication_circuit_different_factors(size_of_circuit, len_a, len_b)
 
     # Binary quadratic model
@@ -76,8 +76,8 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     #     print(c)
     # multiplication_circuit() creates these variables
     p_vars = make_array(size_of_circuit * 2, 'p')
-    a_vars = make_array(size_of_circuit, 'a')
-    b_vars = make_array(size_of_circuit, 'b')
+    a_vars = make_array(len_a, 'a')
+    b_vars = make_array(len_b, 'b')
     binary = "{:0" + str(size_of_circuit * 2) + "b}"
     # Convert P from decimal to binary
     fixed_variables = dict(zip(reversed(p_vars), binary.format(P)))
@@ -86,7 +86,7 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     # Fix product qubits
     for var, value in fixed_variables.items():
         bqm.fix_variable(var, value)
-        # print(var,value)
+
 
     log.debug('bqm construction time: %s', time.time() - construction_start_time)
 
@@ -143,7 +143,7 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
             results_dict[(a, b, P)]["Percentage of results"] = 100 * \
                                                                results_dict[(a, b, P)]["Occurrences"] / num_reads
         else:
-            if a * b == P:
+            # if a * b == P:
                 # results_dict[(a, b, P)] = {a, b, a * b == P, num_occurrences, 100 * num_occurrences / num_reads}
                 results_dict[(a, b, P)] = {"a": a,
                                            "b": b,
@@ -161,16 +161,16 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     output['Results'] = list(results_dict.values())
     output['Number of reads'] = num_reads
 
-    # output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
+    output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
     return output, csp
 
 
 if __name__ == '__main__':
     # get input from user
-    number = 59989
+    number = 299
     gap = 0.1
     graph = 8
-    circuit = 8
+    circuit = 5
     output, csp = factor(number, gap, graph, circuit)
 
     # output results

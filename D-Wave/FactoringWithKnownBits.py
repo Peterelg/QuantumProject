@@ -8,6 +8,7 @@ from collections import OrderedDict
 import dwavebinarycsp as dbc
 from dwave.system import DWaveSampler, EmbeddingComposite
 from EditedCircuit import multiplication_circuit
+from saveData import save_data
 import neal
 
 log = logging.getLogger(__name__)
@@ -96,8 +97,11 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
 
     sample_time = time.time()
 
+    # # Set a local sampler
+    # sampler = neal.SimulatedAnnealingSampler()
+
     # Set a QPU sampler
-    sampler = neal.SimulatedAnnealingSampler()
+    sampler = EmbeddingComposite(DWaveSampler())
 
     num_reads = 2000
     print("running localy")
@@ -153,7 +157,7 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
             results_dict[(a, b, P)]["Percentage of results"] = 100 * \
                                                                results_dict[(a, b, P)]["Occurrences"] / num_reads
         else:
-            if a * b == P:
+            # if a * b == P:
                 results_dict[(a, b, P)] = {
                     "a": a,
                     "b": b,
@@ -163,16 +167,16 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
                     "Valid": a * b == P,
                     "Occurrences": num_occurrences,
                     "Percentage of results": 100 * num_occurrences / num_reads}
-            elif a == 659 or b == 659 or a == 571 or b == 571:
-                    results_dict[(a, b, P)] = {
-                        "a": a,
-                        "b": b,
-                        "bitA": bitA,
-                        "bitB": bitB,
-                        "product": a * b,
-                        "Valid": a * b == P,
-                        "Occurrences": num_occurrences,
-                        "Percentage of results": 100 * num_occurrences / num_reads}
+            # elif a == 659 or b == 659 or a == 571 or b == 571:
+            #         results_dict[(a, b, P)] = {
+            #             "a": a,
+            #             "b": b,
+            #             "bitA": bitA,
+            #             "bitB": bitB,
+            #             "product": a * b,
+            #             "Valid": a * b == P,
+            #             "Occurrences": num_occurrences,
+            #             "Percentage of results": 100 * num_occurrences / num_reads}
         # else:
         #     wrong_A = wrong_A + 1
         # results_dict[(a, b, P)] = {"a": a,
@@ -184,17 +188,21 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     output['Results'] = list(results_dict.values())
     output['Number of reads'] = num_reads
 
-    # output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
+    #output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
+    save_data(P, 'DW_2000Q_6+knownBit', size_of_circuit, gap_size, max_graph_size, output)
+
     return output, csp
 
 
 if __name__ == '__main__':
     # get input from user
-    number = 376289
-    gap = 2
-    graph = 20
-    circuit = 10
-    output, csp = factor(number, gap, graph, circuit)
+    number = 59989
+    circuit = 8
+    gaps = [0.01,0.1,1,2]
+    graphs = [6,7,8,9]
+    for gap in gaps:
+        for graph in graphs:
+            output, csp = factor(number, gap, graph, circuit)
 
     # output results
-    pprint(output)
+    # pprint(output)

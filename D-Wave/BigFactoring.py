@@ -7,7 +7,7 @@ from collections import OrderedDict
 from saveData import save_data
 import dwavebinarycsp as dbc
 from dwave.system import DWaveSampler, EmbeddingComposite
-
+import neal
 log = logging.getLogger(__name__)
 
 
@@ -77,11 +77,13 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     # ===========
 
     sample_time = time.time()
+    # # Set a local sampler
+    # sampler = neal.SimulatedAnnealingSampler()
 
     # Set a QPU sampler
     sampler = EmbeddingComposite(DWaveSampler())
 
-    num_reads = 1000
+    num_reads = 2000
     print("Sent to D-Wave")
     sampleset = sampler.sample(bqm, num_reads=num_reads)
 
@@ -145,26 +147,19 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     output['Results'] = list(results_dict.values())
     output['Number of reads'] = num_reads
 
-    output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
+    # output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
     save_data(P, 'Advantage_system1.1', size_of_circuit, gap_size, max_graph_size, output)
     return output
 
 
 if __name__ == '__main__':
-    # get input from user
-    print("Enter a number to be factored:")
-    #
-    # # send problem to QPU
-    print("Running on QPU")
-    # numbers = [143,1000,403,901]
-    numbers = [299]
-    gaps = [0.01, 0.03, 0.05, 0.08, 0.1]
-    for n in numbers:
-        for gap in gaps:
-            for graph in range(5, 20, 5):
-                for circuit in range(5, 8):
-                    output = factor(n, gap, graph, circuit)
-                    print('done:', gap, graph, circuit)
-
+    number = 59989
+    circuit = 8
+    gaps = [0.01, 0.1, 1, 2]
+    graphs = [6, 7, 8, 9]
+    for gap in gaps:
+        for graph in graphs:
+            output = factor(number, gap, graph, circuit)
+            print('done:', gap, graph)
     # output results
     # pprint(output)
