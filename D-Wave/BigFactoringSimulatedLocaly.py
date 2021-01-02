@@ -6,6 +6,7 @@ import functools
 import helpers
 from collections import OrderedDict
 import dwavebinarycsp as dbc
+from FactoingwithDifferentLengths import multiplication_circuit_different_factors
 from dwave.system import DWaveSampler, EmbeddingComposite
 from EditedCircuit import multiplication_circuit
 import neal
@@ -61,7 +62,13 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     # csp, inputs = multiplication_circuit(size_of_circuit)
 
     """original simulation"""
-    csp = dbc.factories.multiplication_circuit(size_of_circuit)
+    # csp = dbc.factories.multiplication_circuit(size_of_circuit)
+
+
+    """different lengths of a and b"""
+    len_a = size_of_circuit
+    len_b = size_of_circuit
+    csp = multiplication_circuit_different_factors(size_of_circuit)
 
     # Binary quadratic model
     bqm = dbc.stitch(csp, max_graph_size=max_graph_size, min_classical_gap=gap_size)
