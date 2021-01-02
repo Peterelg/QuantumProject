@@ -1,3 +1,4 @@
+import operator
 from collections import defaultdict
 from collections import OrderedDict
 import dimod
@@ -74,9 +75,25 @@ def circuit(vartype=dimod.BINARY):
     SUM = defaultdict(dict)  # the sum of the ADDER gate associated with ai, bj is stored in SUM[i][j]
     CARRY = defaultdict(dict)
 
-    gate = and_gate([a[0], b[0], p[0]], vartype=vartype)
+    csp.add_constraint(operator.truth, ['a0'])
+    #setting the and gates
+    for i in range(1,2):
+        for j in range(1,2):
+            ai = a[i]
+            bj = b[j]
+            andij = AND[i][j] = 'and%s,%s' % (i, j)
+            gate = and_gate([ai, bj, andij], vartype=vartype, name='AND(%s, %s) = %s' % (ai, bj, andij))
+            csp.add_constraint(gate)
+
+
+    #half adder
+    gate = halfadder_gate([a[1], b[1], SUM[1][1], p[1]], vartype=vartype)
     csp.add_constraint(gate)
-    gate = or_gate([a[0], b[0], p[0]], vartype=vartype)
+    gate = halfadder_gate([a[2], AND[1][1], SUM[1][1], CARRY[1][1]], vartype=vartype)
+    csp.add_constraint(gate)
+
+    #full adder
+    gate = fulladder_gate([AND[2][2], b[1], SUM[1][2], CARRY[1][2]], vartype=vartype)
     csp.add_constraint(gate)
 
     return csp

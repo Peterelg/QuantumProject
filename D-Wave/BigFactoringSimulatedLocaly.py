@@ -57,9 +57,12 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
 
     validate_input(P, range(2 ** (size_of_circuit * 2)))
 
-    # Constraint satisfaction problem
-    # where the number of
-    csp, inputs = multiplication_circuit(size_of_circuit)
+    """adapted simulation"""
+    # csp, inputs = multiplication_circuit(size_of_circuit)
+
+    """original simulation"""
+    csp = dbc.factories.multiplication_circuit(size_of_circuit)
+
     # Binary quadratic model
     bqm = dbc.stitch(csp, max_graph_size=max_graph_size, min_classical_gap=gap_size)
     # for c in iter(csp.constraints):
@@ -77,10 +80,7 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
     for var, value in fixed_variables.items():
         bqm.fix_variable(var, value)
         # print(var,value)
-    # bqm.fix_variable('a0', 1)
-    # bqm.fix_variable('b0', 1)
-    # bqm.fix_variable('a3', 1)
-    # bqm.fix_variable('b3', 1)
+
     log.debug('bqm construction time: %s', time.time() - construction_start_time)
 
     # Run problem
