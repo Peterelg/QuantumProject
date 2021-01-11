@@ -9,6 +9,7 @@ import csv
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
+
 # import numpy
 
 def list_files(dir):
@@ -17,6 +18,15 @@ def list_files(dir):
         if file.endswith(".csv"):
             files.append(file)
     return files
+
+
+def get_settings(files):
+    label = []
+    for file in files:
+        gap = file.split('gap')[1].split('graph')[0]
+        graph = file.split('graph')[1].split('.csv')[0]
+        label.append(gap + '\n' + graph)
+    return label
 
 
 def list_true_false_results(dir, files):
@@ -44,18 +54,26 @@ def list_true_false_results(dir, files):
 
 
 if __name__ == '__main__':
-    endings = ['Local/Extra_Bit/', 'Local/No_Extra_Bit/', 'DW2000/Extra_Bit/', 'DW2000/No_Extra_Bit/',
-               'Advantage_System/Extra_Bit/', 'Advantage_System/No_Extra_Bit/']
-    xLabel = ['0.01-6', '0.01-7', '0.01-8', '0.01-9', '0.1-6', '0.1-7',
-              '0.1-8', '0.1-9', '1-6', '1-7', '1-8', '1-9', '2-6',
-              '2-7', '2-8', '2-9']
+    endings = ['Local/One_Extra_Bit/', 'Local/Two_Extra_Bits/', 'Local/No_Extra_Bit/',
+               'DW2000/One_Extra_Bit/', 'DW2000/Two_Extra_Bits/', 'DW2000/No_Extra_Bit/',
+               'Advantage_System/One_Extra_Bit/', 'Advantage_System/Two_Extra_Bits/', 'Advantage_System/No_Extra_Bit/']
+    xLabel = ['.01\n6', '.01\n7', '.01\n8', '.01\n9', '.1\n6', '.1\n7',
+              '.1\n8', '.1\n9', '1\n6', '1\n7', '1\n8', '1\n9', '2\n6',
+              '2\n7', '2\n8', '2\n9']
     dir = "/Users/peterelgar/PycharmProjects/QuantumProject1/D-Wave/results/"
     for ending in endings:
         folder = dir + ending
         files = list_files(folder)
-        true_results, false_results = list_true_false_results(folder, files)
-        plt.bar(xLabel[:len(true_results)], true_results)
-        plt.title(ending)
-        plt.ylabel('number of correct results')
-        plt.xlabel('settings gap size-graph size')
-        plt.show()
+
+        files.sort()
+        labels = get_settings(files)
+        # print(files)
+        print(labels)
+        # true_results, false_results = list_true_false_results(folder, files)
+        # plt.bar(xLabel[:len(true_results)], true_results)
+        # plt.title(ending.replace('/', ' '))
+        # plt.ylabel('number of correct results')
+        # plt.xlabel('settings gap size and graph size')
+        # plt.show()
+        # plt.savefig(ending.replace('/', '_', 1).replace('/', ''), bbox_inches='tight', pad_inches=0.2)
+        # plt.clf()

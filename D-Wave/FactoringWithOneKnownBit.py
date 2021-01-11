@@ -52,21 +52,18 @@ def make_array(size, string):
 
 
 def make_var_array(size, string):
-    return [string + str(i) for i in range(1, size - 1)]
+    return [string + str(i) for i in range(1, size)]
 
 
 def factor(P, gap_size, max_graph_size, size_of_circuit):
     # Construct circuit
     # =================
     construction_start_time = time.time()
-    extra_number = (2 ** (size_of_circuit - 1)) + 1
+    extra_number = 1
 
     # Constraint satisfaction problem
-    """Modified CSP"""
-    # csp, inputs = multiplication_circuit(size_of_circuit)
 
     """Normal Case CSP"""
-
     csp = dbc.factories.multiplication_circuit(size_of_circuit)
 
     # Binary quadratic model
@@ -86,16 +83,11 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
         bqm.fix_variable(var, value)
     bqm.fix_variable('a0', 1)
     bqm.fix_variable('b0', 1)
-    bqm.fix_variable('a'+str(size_of_circuit-1), 1)
-    bqm.fix_variable('b'+str(size_of_circuit-1), 1)
-    # print(csp.constraints)
-    # for constraint in csp.constraints:
-    #     print(constraint)
+
     log.debug('bqm construction time: %s', time.time() - construction_start_time)
 
     # Run problem
     # ===========
-
     sample_time = time.time()
 
     # # Set a local sampler
@@ -148,8 +140,8 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
         a, b = int((a << 1)), int((b << 1))
         a += extra_number
         b += extra_number
-        bitA = "1" + bitA + "1"
-        bitB = "1" + bitB + "1"
+        bitA = bitA + "1"
+        bitB = bitB + "1"
         # a, b = int(a + 2 ** (size_of_circuit-1) + 2 ** 0), int(a + 2 ** (size_of_circuit-1) + 2 ** 0)
 
         # Aggregate results by unique A and B values (ignoring internal circuit variables)
@@ -159,25 +151,25 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
                                                                results_dict[(a, b, P)]["Occurrences"] / num_reads
         else:
             # if a * b == P:
-                results_dict[(a, b, P)] = {
-                    "a": a,
-                    "b": b,
-                    "bitA": bitA,
-                    "bitB": bitB,
-                    "product": a * b,
-                    "Valid": a * b == P,
-                    "Occurrences": num_occurrences,
-                    "Percentage of results": 100 * num_occurrences / num_reads}
-            # elif a == 659 or b == 659 or a == 571 or b == 571:
-            #         results_dict[(a, b, P)] = {
-            #             "a": a,
-            #             "b": b,
-            #             "bitA": bitA,
-            #             "bitB": bitB,
-            #             "product": a * b,
-            #             "Valid": a * b == P,
-            #             "Occurrences": num_occurrences,
-            #             "Percentage of results": 100 * num_occurrences / num_reads}
+            results_dict[(a, b, P)] = {
+                "a": a,
+                "b": b,
+                "bitA": bitA,
+                "bitB": bitB,
+                "product": a * b,
+                "Valid": a * b == P,
+                "Occurrences": num_occurrences,
+                "Percentage of results": 100 * num_occurrences / num_reads}
+        # elif a == 659 or b == 659 or a == 571 or b == 571:
+        #         results_dict[(a, b, P)] = {
+        #             "a": a,
+        #             "b": b,
+        #             "bitA": bitA,
+        #             "bitB": bitB,
+        #             "product": a * b,
+        #             "Valid": a * b == P,
+        #             "Occurrences": num_occurrences,
+        #             "Percentage of results": 100 * num_occurrences / num_reads}
         # else:
         #     wrong_A = wrong_A + 1
         # results_dict[(a, b, P)] = {"a": a,
@@ -188,9 +180,10 @@ def factor(P, gap_size, max_graph_size, size_of_circuit):
 
     output['Results'] = list(results_dict.values())
     output['Number of reads'] = num_reads
-
-    #output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
-    save_data(P, 'DW_2000Q_6+knownBit', size_of_circuit, gap_size, max_graph_size, output)
+    # pprint(output['Results'])
+    # pprint(results_dict)
+    # output['Timing']['Actual']['QPU processing time'] = sampleset.info['timing']['qpu_access_time']
+    save_data(P, 'DW_2000Q+OneBit', size_of_circuit, gap_size, max_graph_size, output)
 
     return output, csp
 
@@ -199,11 +192,10 @@ if __name__ == '__main__':
     # get input from user
     number = 59989
     circuit = 8
-    gaps = [0.01,0.1,1,2]
-    graphs = [6,7,8,9]
+    gaps = [0.01, 0.1, 1, 2]
+    graphs = [6, 7, 8, 9]
     for gap in gaps:
         for graph in graphs:
             output, csp = factor(number, gap, graph, circuit)
-
     # output results
     # pprint(output)
